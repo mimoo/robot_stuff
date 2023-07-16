@@ -157,12 +157,12 @@ function moveTo(row_idx: number, col_idx: number) {
 const DEFAULT_TIMER = 60;
 
 const timeLeft: Ref<number> = ref(DEFAULT_TIMER);
-const timerEnabled: Ref<boolean> = ref(true);
+const timerEnabled: Ref<boolean> = ref(false);
 let timerId: any = null;
 
 // starts the timer when timerEnabled is set to true
-watch(timerEnabled, async (newValue) => {
-  console.log("timerEnabled changed to " + newValue);
+watch(timerEnabled, async (newValue, oldValue) => {
+  console.log(`timerEnabled changed from ${oldValue} to ${newValue}`);
   if (newValue) {
     timeLeft.value = DEFAULT_TIMER;
     timerId = setTimeout(() => {
@@ -186,14 +186,24 @@ watch(
       timerEnabled.value = false;
     }
   },
-  { immediate: true }
+  { immediate: true } // in case we want to start it at page load
 );
 
-function startTimer() {
+function restartTimer() {
+  console.log("restarting timer...");
   if (timerId !== null) {
     clearTimeout(timerId);
   }
-  timerEnabled.value = true;
+  timeLeft.value = DEFAULT_TIMER;
+    timerEnabled.value = true;
+}
+
+function stopTimer() {
+    console.log("pausing timer...");
+    if (timerId !== null) {
+        clearTimeout(timerId);
+    }
+    timerEnabled.value = false;
 }
 </script>
 
@@ -218,9 +228,19 @@ function startTimer() {
       <div>
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          @click="startTimer"
+          @click="restartTimer"
         >
-          restart timer
+          start timer
+        </button>
+      </div>
+
+      <!-- pause timer -->
+      <div>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          @click="stopTimer"
+        >
+          stop timer
         </button>
       </div>
 
