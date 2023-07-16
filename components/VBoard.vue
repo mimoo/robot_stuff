@@ -93,9 +93,9 @@ function isActive(row_idx: number, col_idx: number) {
   return false;
 }
 
-function activeMovement(robotIdx: number) {
+function activeMovement(robotIdx: number, autoMove: boolean = false) {
   // unclick
-  if (activeRobot.value === robotIdx) {
+  if (activeRobot.value === robotIdx && !autoMove) {
     activeRobot.value = null;
     activeTiles.value = [];
     return;
@@ -146,7 +146,7 @@ function moveTo(row_idx: number, col_idx: number) {
     game.value.startNextRound();
   } else {
     // continue moving?
-    activeMovement(activeRobot.value);
+    activeMovement(activeRobot.value, true);
   }
 }
 
