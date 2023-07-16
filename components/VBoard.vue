@@ -160,15 +160,19 @@ const timeLeft: Ref<number> = ref(DEFAULT_TIMER);
 const timerEnabled: Ref<boolean> = ref(true);
 let timerId: any = null;
 
+// starts the timer when timerEnabled is set to true
 watch(timerEnabled, async (newValue) => {
   console.log("timerEnabled changed to " + newValue);
   if (newValue) {
+    timeLeft.value = DEFAULT_TIMER;
     timerId = setTimeout(() => {
       timeLeft.value--;
     }, 1000);
   }
 });
 
+// keeps decreasing the timer when the value of timeLeft changes,
+// stops the timer when timeLeft is set to 0
 watch(
   timeLeft,
   async (newValue) => {
@@ -177,6 +181,9 @@ watch(
       timerId = setTimeout(() => {
         timeLeft.value--;
       }, 1000);
+    } else if (timerEnabled.value) {
+      console.log("timer ended!");
+      timerEnabled.value = false;
     }
   },
   { immediate: true }
@@ -186,7 +193,6 @@ function startTimer() {
   if (timerId !== null) {
     clearTimeout(timerId);
   }
-  timeLeft.value = DEFAULT_TIMER;
   timerEnabled.value = true;
 }
 </script>
@@ -279,6 +285,34 @@ function startTimer() {
         </td>
       </tr>
     </table>
+
+    <!-- rules -->
+    <div class="my-5 hero bg-base-200">
+      <div class="hero-content ">
+        <div class="max-w-md">
+          <h1 class="text-5xl font-bold text-center">Rules</h1>
+          <p class="py-2">
+            
+            <!-- start of list -->
+            <div class="flex justify-start cursor-pointer text-gray-700 hover:text-blue-400 hover:bg-blue-100 rounded-md px-2 py-2 my-2">
+                <span class="bg-gray-400 h-2 w-2 m-2 rounded-full"></span>
+                <div class="flex-grow font-medium px-2">Get a bunch of friends together.</div>
+            </div>
+
+            <div class="flex justify-start cursor-pointer text-gray-700 hover:text-blue-400 hover:bg-blue-100 rounded-md px-2 py-2 my-2">
+                <span class="bg-gray-400 h-2 w-2 m-2 rounded-full"></span>
+                <div class="flex-grow font-medium px-2">If you find a solution (number of moves that gets the robot of the same color as the target, to the target), say it and then restart the timer.</div>
+            </div>
+
+            <div class="flex justify-start cursor-pointer text-gray-700 hover:text-blue-400 hover:bg-blue-100 rounded-md px-2 py-2 my-2">
+                <span class="bg-gray-400 h-2 w-2 m-2 rounded-full"></span>
+                <div class="flex-grow font-medium px-2">The one that finds the shortest solution wins, if nobody finds a smaller number of moves then the original solution wins.</div>
+            </div>
+            <!-- end of list -->
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
