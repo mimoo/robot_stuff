@@ -1,64 +1,10 @@
-# Nuxt 3 Minimal Starter
+# Robot Stuff
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+![robot stuff](https://i.imgur.com/pfovAGb.png)
 
-## Setup
+The idea is to play with your friends, and with a timer.
 
-Make sure to install the dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-# robot_stuff
+1. Set the timer to X minutes
+2. If someone finds a solution, they must yell the number of moves
+3. Reset the timer
+4. Now the person that finds the solution with the less move wins (if nobody finds a better solution, the original solution wins)
