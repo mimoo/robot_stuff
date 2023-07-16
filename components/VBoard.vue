@@ -230,7 +230,7 @@ function stopTimer() {
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           @click="restartTimer"
         >
-          start timer
+          start countdown
         </button>
       </div>
 
@@ -240,7 +240,7 @@ function stopTimer() {
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           @click="stopTimer"
         >
-          stop timer
+          stop countdown
         </button>
       </div>
 
@@ -316,12 +316,12 @@ function stopTimer() {
             <!-- start of list -->
             <div class="flex justify-start cursor-pointer text-gray-700 hover:text-blue-400 hover:bg-blue-100 rounded-md px-2 py-2 my-2">
                 <span class="bg-gray-400 h-2 w-2 m-2 rounded-full"></span>
-                <div class="flex-grow font-medium px-2">Get a bunch of friends together.</div>
+                <div class="flex-grow font-medium px-2">Get a bunch of friends together and start the countdown.</div>
             </div>
 
             <div class="flex justify-start cursor-pointer text-gray-700 hover:text-blue-400 hover:bg-blue-100 rounded-md px-2 py-2 my-2">
                 <span class="bg-gray-400 h-2 w-2 m-2 rounded-full"></span>
-                <div class="flex-grow font-medium px-2">If you find a solution (number of moves that gets the robot of the same color as the target, to the target), say it and then restart the timer.</div>
+                <div class="flex-grow font-medium px-2">If you find a solution (number of moves that gets the robot of the same color as the target, to the target), say it and then restart the countdown.</div>
             </div>
 
             <div class="flex justify-start cursor-pointer text-gray-700 hover:text-blue-400 hover:bg-blue-100 rounded-md px-2 py-2 my-2">
