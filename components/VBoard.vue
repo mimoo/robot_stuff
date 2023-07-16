@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, computed, ref, Ref } from "vue";
+import { onMounted, computed, ref, Ref, watch } from "vue";
 //import { Game } from "#imports";
 
 //
@@ -149,6 +149,46 @@ function moveTo(row_idx: number, col_idx: number) {
     activeMovement(activeRobot.value);
   }
 }
+
+//
+// Timer stuff
+//
+
+const DEFAULT_TIMER = 60;
+
+const timeLeft: Ref<number> = ref(DEFAULT_TIMER);
+const timerEnabled: Ref<boolean> = ref(true);
+let timerId: any = null;
+
+watch(timerEnabled, async (newValue) => {
+  console.log("timerEnabled changed to " + newValue);
+  if (newValue) {
+    timerId = setTimeout(() => {
+      timeLeft.value--;
+    }, 1000);
+  }
+});
+
+watch(
+  timeLeft,
+  async (newValue) => {
+    console.log("timeLeft changed to " + newValue);
+    if (newValue > 0 && timerEnabled.value) {
+      timerId = setTimeout(() => {
+        timeLeft.value--;
+      }, 1000);
+    }
+  },
+  { immediate: true }
+);
+
+function startTimer() {
+  if (timerId !== null) {
+    clearTimeout(timerId);
+  }
+  timeLeft.value = DEFAULT_TIMER;
+  timerEnabled.value = true;
+}
 </script>
 
 <template>
@@ -161,20 +201,40 @@ function moveTo(row_idx: number, col_idx: number) {
         <div class="text-2xl font-bold text-gray-900">{{ numMoves }}</div>
       </div>
 
+      <!-- countdown -->
+      <div>
+        <span class="countdown font-mono text-6xl">
+          <span :style="'--value: ' + timeLeft"></span>
+        </span>
+      </div>
+
+      <!-- restart timer -->
+      <div>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          @click="startTimer"
+        >
+          restart timer
+        </button>
+      </div>
+
+      <!-- reset moves -->
       <div>
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           @click="resetGame"
         >
-          reset game
+          reset moves
         </button>
       </div>
+
+      <!-- start a game -->
       <div>
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           @click="startGame"
         >
-          start a game
+          start a new game
         </button>
       </div>
     </nav>
