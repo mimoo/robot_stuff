@@ -77,6 +77,7 @@ const normalWalls: [Tile, string][] = [
 class Board {
   id: string;
   robots: Tile[];
+  robotsBackupPositions: Tile[];
   walls: Map<string, boolean>;
   target: Tile;
   targetForRobot: number;
@@ -84,9 +85,17 @@ class Board {
   constructor(name: string) {
     this.id = name;
     this.robots = [];
+    this.robotsBackupPositions = [];
     this.walls = new Map();
     this.target = { x: 0, y: 0 };
     this.targetForRobot = 0;
+  }
+
+  reset() {
+    console.log("resetting board");
+    console.log(this.robotsBackupPositions);
+    console.log(this.robots);
+    this.robots = [...this.robotsBackupPositions];
   }
 
   otherTileFrom(tile: Tile, direction: string): Tile {
@@ -283,6 +292,9 @@ class Board {
       occupied.add(pos);
       this.robots.push(corner_walls[pos][0]);
     }
+
+    // backup
+    this.robotsBackupPositions = [...this.robots];
   }
 }
 
@@ -317,5 +329,8 @@ export class Game {
     // target a random robot
     const robot = Math.floor(Math.random() * NUM_ROBOTS);
     this.board.targetForRobot = robot;
+
+    // backup
+    this.board.robotsBackupPositions = [...this.board.robots];
   }
 }

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, Ref } from "vue";
+import { onMounted, computed, ref, Ref } from "vue";
 //import { Game } from "#imports";
 
 //
@@ -8,6 +8,11 @@ import { computed, ref, Ref } from "vue";
 
 const game: Ref<Game> = ref(new Game("default name"));
 const size: Ref<number> = ref(16);
+
+// start the game on mounted
+onMounted(() => {
+  game.value.startGame();
+});
 
 //
 // Methods
@@ -104,6 +109,11 @@ function activeMovement(robotIdx: number) {
   });
 }
 
+function resetGame() {
+  game.value.board.reset();
+  numMoves.value = 0;
+}
+
 function moveTo(row_idx: number, col_idx: number) {
   // sanity check
   if (activeRobot.value === null) {
@@ -119,7 +129,6 @@ function moveTo(row_idx: number, col_idx: number) {
 
   // reset active tiles
   activeTiles.value = [];
-  activeRobot.value = null;
 
   // add to move number
   numMoves.value += 1;
@@ -128,17 +137,47 @@ function moveTo(row_idx: number, col_idx: number) {
   if (hasWon) {
     console.log("you won!");
     numMoves.value = 0;
+    activeRobot.value = null;
     game.value.startNextRound();
+  } else {
+    // continue moving?
+    activeMovement(activeRobot.value);
   }
 }
 </script>
 
 <template>
-  {{ numMoves }}
-  <div class="container">
+  <div class="container mx-auto">
+    <!-- nav -->
+    <nav class="mt-5 flex flex-row justify-self-auto gap-7">
+      <!-- score -->
+      <div>
+        <div class="text-base text-gray-400">Moves</div>
+        <div class="text-2xl font-bold text-gray-900">{{ numMoves }}</div>
+      </div>
+
+      <div>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          @click="resetGame"
+        >
+          reset game
+        </button>
+      </div>
+      <div>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          @click="startGame"
+        >
+          start a game
+        </button>
+      </div>
+    </nav>
+
+    <!-- board -->
     <table
-      style="border: 1px black solid; margin: auto"
-      class="border-separate border table-fixed"
+      style="border: 1px black solid"
+      class="border-separate table-fixed mx-auto border-black"
     >
       <!-- give class bottom wall only if botom wall is true-->
       <tr v-for="(row, row_idx) in boardInfo">
@@ -175,13 +214,6 @@ function moveTo(row_idx: number, col_idx: number) {
         </td>
       </tr>
     </table>
-
-    <button
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      @click="startGame"
-    >
-      start a game
-    </button>
   </div>
 </template>
 
