@@ -94,7 +94,12 @@ function isActive(row_idx: number, col_idx: number) {
 }
 
 function activeMovement(robotIdx: number) {
-  console.log(`figuring out movements for robot ${robotIdx}`);
+  // unclick
+  if (activeRobot.value === robotIdx) {
+    activeRobot.value = null;
+    activeTiles.value = [];
+    return;
+  }
 
   // reset active tiles
   activeTiles.value = [];
