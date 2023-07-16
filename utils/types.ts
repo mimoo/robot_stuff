@@ -279,18 +279,28 @@ class Board {
     }
   }
 
+  inMiddleBox(x: number, y: number): boolean {
+    return (x == 7 && (y == 7 || y == 8)) || (x == 8 && (y == 7 || y == 8));
+  }
+
   initRobots() {
-    let occupied = new Set();
+    this.robots = [];
+
+    let occupied: Set<[number, number]> = new Set();
     while (true) {
+      // we're done
       if (occupied.size == NUM_ROBOTS) {
         break;
       }
-      let pos = Math.floor(Math.random() * corner_walls.length);
-      if (occupied.has(pos)) {
+
+      // rando tile
+      let x = Math.floor(Math.random() * SIZE);
+      let y = Math.floor(Math.random() * SIZE);
+      if (occupied.has([x, y]) || this.inMiddleBox(x, y)) {
         continue;
       }
-      occupied.add(pos);
-      this.robots.push(corner_walls[pos][0]);
+      occupied.add([x, y]);
+      this.robots.push({ x: x, y: y });
     }
 
     // backup
