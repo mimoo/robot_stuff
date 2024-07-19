@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, computed, ref, Ref, watch } from "vue";
-//import { Game } from "#imports";
+import { Game, Tile } from "~/utils/types";
 
 //
 // Refs

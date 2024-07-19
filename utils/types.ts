@@ -163,7 +163,8 @@ class Board {
           // check if there's a wall, or a robot in the way
           if (
             this.hasWall(finalTile, direction) ||
-            this.hasRobot(next_tile) !== null
+            this.hasRobot(next_tile) !== null ||
+            this.inMiddleBox(next_tile)
           ) {
             break;
           }
@@ -279,8 +280,11 @@ class Board {
     }
   }
 
-  inMiddleBox(x: number, y: number): boolean {
-    return (x == 7 && (y == 7 || y == 8)) || (x == 8 && (y == 7 || y == 8));
+  inMiddleBox(tile: Tile): boolean {
+    return (
+      (tile.x == 7 && (tile.y == 7 || tile.y == 8)) ||
+      (tile.x == 8 && (tile.y == 7 || tile.y == 8))
+    );
   }
 
   initRobots() {
@@ -296,7 +300,8 @@ class Board {
       // rando tile
       let x = Math.floor(Math.random() * SIZE);
       let y = Math.floor(Math.random() * SIZE);
-      if (occupied.has([x, y]) || this.inMiddleBox(x, y)) {
+      let tile = { x, y };
+      if (occupied.has([x, y]) || this.inMiddleBox(tile)) {
         continue;
       }
       occupied.add([x, y]);
