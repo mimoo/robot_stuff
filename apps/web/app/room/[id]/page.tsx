@@ -180,7 +180,7 @@ export default function RoomPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full max-w-6xl flex-col px-4 py-2.5 lg:h-[calc(100dvh-3.5rem)] lg:min-h-0 lg:overflow-hidden">
+    <main className="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full max-w-[1400px] flex-col px-4 py-2.5 lg:h-[calc(100dvh-3.5rem)] lg:min-h-0 lg:overflow-hidden">
       {confetti && <Confetti />}
 
       {/* room bar */}
@@ -246,10 +246,11 @@ export default function RoomPage() {
       </header>
 
       <div className="flex min-h-0 flex-col gap-4 lg:flex-1 lg:flex-row lg:justify-center lg:gap-5">
-        {/* left: board + status. A definite width (~= the available board
-            height) makes the column hug the square, and the row centers the
-            whole game. cqmin inside keeps the board from ever overflowing. */}
-        <section className="flex min-h-0 w-full flex-col gap-2.5 lg:w-[calc(100dvh-14rem)] lg:max-w-[58vw]">
+        {/* left: board + status. The width tracks the available board *height*
+            so the square hugs its column (no side gaps) while still filling the
+            height (no top/bottom gaps); it's only capped to avoid horizontal
+            overflow. cqmin inside guarantees the board never overflows. */}
+        <section className="flex min-h-0 w-full flex-col gap-2.5 lg:w-[calc(100dvh_-_17.5rem)] lg:max-w-[min(1020px,calc(100vw_-_25rem))]">
           {/* status strip */}
           <div className="flex h-9 shrink-0 items-center justify-between gap-3">
             <div className="min-w-0">
