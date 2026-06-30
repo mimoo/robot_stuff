@@ -17,68 +17,91 @@ export default function Roster({
 }) {
   const sorted = [...players].sort((a, b) => b.score - a.score);
   return (
-    <div className="panel flex flex-col p-3">
-      <div className="mb-2 flex items-center justify-between px-1">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-white/60">
+    <div className="flex flex-col">
+      <div className="mb-2.5 flex items-center justify-between px-1">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
           Players
         </h2>
-        <span className="text-xs text-white/40">{players.length} in room</span>
+        <span className="text-xs text-[var(--faint)]">
+          {players.length} in room
+        </span>
       </div>
-      <ul className="flex flex-col gap-1.5">
+      <ul className="flex flex-col gap-1">
         {sorted.map((p) => {
           const penalized = p.penalizedUntil != null && p.penalizedUntil > now;
           const penaltyLeft = penalized
             ? Math.ceil((p.penalizedUntil! - now) / 1000)
             : 0;
           const isChamp = champion?.playerId === p.id;
+          const isMe = p.id === myId;
           return (
             <li
               key={p.id}
               className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition-opacity"
               style={{
                 background: isChamp
-                  ? "rgba(250,204,21,0.10)"
-                  : "rgba(255,255,255,0.03)",
-                outline:
-                  p.id === myId ? "1px solid rgba(99,102,241,0.55)" : "none",
+                  ? "color-mix(in oklab, var(--accent) 12%, transparent)"
+                  : isMe
+                    ? "color-mix(in oklab, var(--fg) 5%, transparent)"
+                    : "transparent",
+                boxShadow: isChamp
+                  ? "inset 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent)"
+                  : "none",
                 opacity: p.connected ? 1 : 0.5,
               }}
             >
               <span
-                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-black/80"
-                style={{ background: p.color }}
+                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold text-black/80"
+                style={{
+                  background: `radial-gradient(120% 120% at 32% 24%, color-mix(in oklab, ${p.color} 70%, #fff), ${p.color})`,
+                  boxShadow: "0 2px 6px -2px rgba(0,0,0,0.5)",
+                }}
               >
                 {p.name.slice(0, 1).toUpperCase()}
                 <span
-                  className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#141a2e]"
-                  style={{ background: p.connected ? "#22c55e" : "#64748b" }}
+                  className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full"
+                  style={{
+                    background: p.connected ? "var(--success)" : "#6b7280",
+                    boxShadow: "0 0 0 2px var(--panel-b, #14161e)",
+                  }}
                 />
               </span>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="truncate font-semibold">
+                  <span className="truncate text-sm font-semibold">
                     {p.name}
-                    {p.id === myId && (
-                      <span className="text-white/40"> (you)</span>
-                    )}
+                    {isMe && <span className="text-[var(--faint)]"> · you</span>}
                   </span>
-                  {p.isHost && <span title="Host">👑</span>}
-                  {isChamp && <span title="Current champion">🏆</span>}
+                  {p.isHost && (
+                    <span title="Host" className="text-xs">
+                      👑
+                    </span>
+                  )}
+                  {isChamp && (
+                    <span
+                      title="Current champion"
+                      className="text-[var(--accent)]"
+                    >
+                      ★
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-white/50">
+                <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
                   {!p.connected ? (
-                    <span className="text-amber-400/70">📴 away</span>
+                    <span style={{ color: "var(--accent)" }}>away</span>
                   ) : phase === "lobby" ? (
-                    <span className={p.ready ? "text-emerald-400" : ""}>
-                      {p.ready ? "✓ ready" : "not ready"}
+                    <span style={{ color: p.ready ? "var(--success)" : undefined }}>
+                      {p.ready ? "ready" : "not ready"}
                     </span>
                   ) : penalized ? (
-                    <span className="text-rose-400">🔒 {penaltyLeft}s</span>
+                    <span style={{ color: "var(--danger)" }}>
+                      🔒 {penaltyLeft}s
+                    </span>
                   ) : p.gaveUp ? (
-                    <span className="text-white/40">🏳️ gave up</span>
+                    <span className="text-[var(--faint)]">gave up</span>
                   ) : p.solved ? (
-                    <span className="text-emerald-400">✓ solved</span>
+                    <span style={{ color: "var(--success)" }}>solved</span>
                   ) : (
                     <span>thinking…</span>
                   )}
@@ -86,10 +109,12 @@ export default function Roster({
               </div>
 
               <div className="text-right">
-                <div className="text-lg font-extrabold leading-none">
+                <div className="font-mono text-lg font-bold leading-none tabular-nums">
                   {p.score}
                 </div>
-                <div className="text-[10px] uppercase text-white/40">wins</div>
+                <div className="text-[10px] uppercase tracking-wide text-[var(--faint)]">
+                  wins
+                </div>
               </div>
             </li>
           );

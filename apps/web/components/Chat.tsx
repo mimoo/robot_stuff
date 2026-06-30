@@ -29,16 +29,16 @@ export default function Chat({
   }
 
   return (
-    <div className="panel flex min-h-[220px] flex-1 flex-col p-3 lg:min-h-0">
-      <h2 className="mb-2 px-1 text-sm font-bold uppercase tracking-wide text-white/60">
+    <div className="flex min-h-[180px] flex-1 flex-col lg:min-h-0">
+      <h2 className="mb-2.5 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
         Chat
       </h2>
       <div
         ref={scrollRef}
-        className="scroll-thin mb-2 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-1"
+        className="scroll-thin mb-2.5 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-1"
       >
         {messages.length === 0 && (
-          <p className="px-1 text-sm text-white/30">
+          <p className="px-1 text-sm text-[var(--faint)]">
             Say hi to your friends 👋
           </p>
         )}
@@ -46,21 +46,29 @@ export default function Chat({
           m.system ? (
             <div
               key={m.id}
-              className="px-1 text-center text-xs italic text-white/40"
+              className="py-0.5 text-center text-xs text-[var(--faint)]"
             >
               {m.text}
             </div>
           ) : (
             <div
               key={m.id}
-              className={`max-w-[88%] rounded-2xl px-3 py-1.5 text-sm ${
+              className="max-w-[88%] rounded-2xl px-3 py-1.5 text-sm"
+              style={
                 m.playerId === myId
-                  ? "self-end bg-indigo-500/30"
-                  : "self-start bg-white/5"
-              }`}
+                  ? {
+                      alignSelf: "flex-end",
+                      background:
+                        "color-mix(in oklab, var(--accent) 22%, transparent)",
+                    }
+                  : {
+                      alignSelf: "flex-start",
+                      background: "color-mix(in oklab, var(--fg) 6%, transparent)",
+                    }
+              }
             >
               {m.playerId !== myId && (
-                <div className="text-[11px] font-semibold text-white/50">
+                <div className="text-[11px] font-semibold text-[var(--muted)]">
                   {m.name}
                 </div>
               )}
@@ -77,7 +85,7 @@ export default function Chat({
           maxLength={500}
           onChange={(e) => setText(e.target.value)}
         />
-        <button className="btn btn-primary" type="submit">
+        <button className="btn btn-primary btn-sm" type="submit">
           Send
         </button>
       </form>

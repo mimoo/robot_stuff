@@ -1,8 +1,8 @@
 "use client";
 
 export const THEMES = [
-  { id: "dark", label: "🌙 Dark" },
   { id: "light", label: "☀️ Light" },
+  { id: "dark", label: "🌙 Dark" },
   { id: "midnight", label: "🌌 Midnight" },
   { id: "sunset", label: "🌅 Sunset" },
 ] as const;
@@ -10,7 +10,7 @@ export const THEMES = [
 export type ThemeId = (typeof THEMES)[number]["id"];
 
 const KEY = "robot.theme";
-const DEFAULT: ThemeId = "dark";
+const DEFAULT: ThemeId = "light";
 
 export function getTheme(): ThemeId {
   if (typeof window === "undefined") return DEFAULT;

@@ -180,99 +180,107 @@ export default function RoomPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full max-w-6xl flex-col px-4 py-3 lg:h-[calc(100dvh-3.5rem)] lg:min-h-0 lg:overflow-hidden">
+    <main className="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full max-w-6xl flex-col px-4 py-2.5 lg:h-[calc(100dvh-3.5rem)] lg:min-h-0 lg:overflow-hidden">
       {confetti && <Confetti />}
 
       {/* room bar */}
-      <header className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-lg font-bold leading-tight">
-              {state?.name ?? "Robot Room"}
-            </h1>
-            <div className="flex items-center gap-2 text-xs text-white/40">
-              <span
-                className="inline-block h-2 w-2 rounded-full"
-                style={{
-                  background:
-                    status === "open"
-                      ? "#22c55e"
-                      : status === "connecting"
-                        ? "#f59e0b"
-                        : "#ef4444",
-                }}
-              />
-              {status === "open"
-                ? `Round ${state?.round ?? 0}`
-                : status === "connecting"
-                  ? "connecting…"
-                  : "reconnecting…"}
-            </div>
+      <header className="mb-2.5 flex shrink-0 flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-xl font-bold leading-none">
+            {state?.name ?? "Robot Room"}
+          </h1>
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--muted)]">
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full"
+              style={{
+                background:
+                  status === "open"
+                    ? "var(--success)"
+                    : status === "connecting"
+                      ? "var(--accent)"
+                      : "var(--danger)",
+              }}
+            />
+            {status === "open"
+              ? `Round ${state?.round ?? 0}`
+              : status === "connecting"
+                ? "connecting…"
+                : "reconnecting…"}
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <button
-            className="btn btn-ghost font-mono text-sm tracking-widest"
+            className="chip cursor-pointer font-mono tracking-wider transition-colors hover:text-[var(--fg)]"
             onClick={copyId}
-            title="Copy room ID"
+            title="Copy room code"
           >
-            {copiedId ? "✓ Copied" : <>{roomId} ⧉</>}
+            {copiedId ? "copied ✓" : (
+              <>
+                {roomId}
+                <span className="opacity-40">⧉</span>
+              </>
+            )}
           </button>
-          <button className="btn btn-ghost" onClick={copyLink}>
-            {copied ? "✓ Copied!" : "🔗 Share link"}
+          <button className="btn btn-ghost btn-sm" onClick={copyLink}>
+            {copied ? "✓ link" : "Share"}
           </button>
           {isHost && (phase === "open" || phase === "challenge") && (
-            <button className="btn btn-ghost" onClick={api.pause}>
-              ⏸ Pause
+            <button className="btn btn-ghost btn-sm" onClick={api.pause}>
+              Pause
             </button>
           )}
           {isHost && phase === "paused" && (
-            <button className="btn btn-primary" onClick={api.resume}>
-              ▶ Resume
+            <button className="btn btn-primary btn-sm" onClick={api.resume}>
+              Resume
             </button>
           )}
           <button
-            className="btn btn-ghost"
+            className="btn btn-ghost btn-sm"
             onClick={leaveRoom}
             title="Leave this room and go back home"
           >
-            🚪 Leave
+            Leave
           </button>
         </div>
       </header>
 
-      <div className="grid min-h-0 grid-cols-1 gap-4 lg:flex-1 lg:grid-cols-[1fr_320px]">
-        {/* left: board + status */}
-        <section className="flex min-h-0 flex-col gap-2">
+      <div className="flex min-h-0 flex-col gap-4 lg:flex-1 lg:flex-row lg:justify-center lg:gap-5">
+        {/* left: board + status. A definite width (~= the available board
+            height) makes the column hug the square, and the row centers the
+            whole game. cqmin inside keeps the board from ever overflowing. */}
+        <section className="flex min-h-0 w-full flex-col gap-2.5 lg:w-[calc(100dvh-14rem)] lg:max-w-[58vw]">
           {/* status strip */}
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-            <div className="min-h-[2.5rem]">
+          <div className="flex h-9 shrink-0 items-center justify-between gap-3">
+            <div className="min-w-0">
               {champion ? (
-                <div className="champ-banner flex items-center gap-2 rounded-xl border border-amber-400/30 px-4 py-2">
-                  <span className="text-xl">🏆</span>
-                  <span className="font-semibold">
-                    Best: <b className="text-amber-200">{champion.moves}</b> moves
-                    by {champion.name}
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-base text-[var(--accent)]">★</span>
+                  <span className="truncate">
+                    <span className="text-[var(--muted)]">best</span>{" "}
+                    <b className="font-mono text-[var(--accent)] tabular-nums">
+                      {champion.moves}
+                    </b>{" "}
+                    <span className="text-[var(--muted)]">by</span>{" "}
+                    <span className="font-medium">{champion.name}</span>
                   </span>
                 </div>
               ) : phase === "open" ? (
-                <div className="rounded-xl bg-white/5 px-4 py-2 text-white/70">
-                  🎯 Find a solution! Slide the matching robot onto the target.
-                </div>
+                <span className="text-sm text-[var(--muted)]">
+                  Slide the matching robot onto the target.
+                </span>
               ) : null}
             </div>
 
             {challengeLeft != null && (
               <div
-                className={`flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-3xl font-black tabular-nums ${
-                  challengeLeft <= 10
-                    ? "bg-rose-500/20 text-rose-300"
-                    : "bg-white/5 text-white"
-                }`}
+                className="flex items-center gap-1.5 font-mono text-2xl font-semibold tabular-nums transition-colors"
+                style={{
+                  color: challengeLeft <= 10 ? "var(--danger)" : "var(--fg)",
+                }}
               >
-                ⏱{" "}
-                {String(Math.floor(challengeLeft / 60)).padStart(1, "0")}:
+                <span className="text-sm text-[var(--muted)]">⏱</span>
+                {Math.floor(challengeLeft / 60)}:
                 {String(challengeLeft % 60).padStart(2, "0")}
               </div>
             )}
@@ -324,28 +332,34 @@ export default function RoomPage() {
           </div>
         </section>
 
-        {/* right: roster, settings, chat */}
-        <aside className="flex min-h-0 flex-col gap-3 lg:overflow-hidden">
+        {/* right: roster, settings, chat — one cohesive panel */}
+        <aside className="panel flex min-h-0 w-full flex-col overflow-hidden lg:w-[340px] lg:shrink-0">
           {state && (
-            <Roster
-              players={state.players}
-              myId={playerId}
-              phase={phase}
-              champion={champion}
-              now={now}
-            />
+            <div className="shrink-0 p-3.5">
+              <Roster
+                players={state.players}
+                myId={playerId}
+                phase={phase}
+                champion={champion}
+                now={now}
+              />
+            </div>
           )}
 
           {state && phase === "lobby" && (
-            <SettingsPanel
-              settings={state.settings}
-              editable={isHost}
-              onChange={(s) => api.updateSettings(s)}
-            />
+            <div className="hairline shrink-0 border-t p-3.5">
+              <SettingsPanel
+                settings={state.settings}
+                editable={isHost}
+                onChange={(s) => api.updateSettings(s)}
+              />
+            </div>
           )}
 
           {state && (
-            <Chat messages={api.chat} myId={playerId} onSend={api.sendChat} />
+            <div className="hairline flex min-h-0 flex-1 flex-col border-t p-3.5">
+              <Chat messages={api.chat} myId={playerId} onSend={api.sendChat} />
+            </div>
           )}
         </aside>
       </div>
@@ -353,7 +367,10 @@ export default function RoomPage() {
       {/* toast */}
       {toast && (
         <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center">
-          <div className="animate-pop rounded-full bg-indigo-500/90 px-5 py-2.5 font-semibold shadow-2xl">
+          <div
+            className="animate-rise rounded-full px-5 py-2.5 text-sm font-semibold shadow-2xl"
+            style={{ background: "var(--accent)", color: "var(--accent-ink)" }}
+          >
             {toast}
           </div>
         </div>
@@ -387,33 +404,35 @@ function ControlBar({
   const giveUpBtn =
     (phase === "open" || phase === "challenge") && !isChampion ? (
       <button
-        className="btn btn-ghost"
+        className="btn btn-ghost btn-sm"
         onClick={onGiveUp}
         disabled={gaveUp}
         title="Stop trying this round. If everyone gives up, the round ends now."
       >
-        {gaveUp ? "🏳️ Gave up" : "🏳️ Give up"}
+        {gaveUp ? "Gave up" : "Give up"}
       </button>
     ) : null;
 
+  const shell =
+    "panel flex flex-wrap items-center justify-between gap-3 px-4 py-3";
+
   if (phase === "lobby") {
     return (
-      <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
-        <p className="text-sm text-white/60">
-          Mark ready when you&apos;re set. The game starts when everyone&apos;s
-          ready.
+      <div className={shell}>
+        <p className="text-sm text-[var(--muted)]">
+          Mark ready — the game starts when everyone&apos;s set.
         </p>
         <div className="flex gap-2">
           {isHost && (
-            <button className="btn btn-ghost" onClick={onStart}>
+            <button className="btn btn-ghost btn-sm" onClick={onStart}>
               Start now
             </button>
           )}
           <button
-            className={`btn ${ready ? "btn-ghost" : "btn-ready"}`}
+            className={`btn btn-sm ${ready ? "btn-ghost" : "btn-ready"}`}
             onClick={() => onReady(!ready)}
           >
-            {ready ? "✓ Ready (cancel)" : "I'm ready!"}
+            {ready ? "✓ Ready (cancel)" : "I'm ready"}
           </button>
         </div>
       </div>
@@ -422,15 +441,15 @@ function ControlBar({
 
   if (phase === "roundEnd") {
     return (
-      <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
-        <p className="text-sm text-white/60">Round over! 🎉</p>
+      <div className={shell}>
+        <p className="text-sm text-[var(--muted)]">Round over 🎉</p>
         {isHost ? (
-          <button className="btn btn-primary" onClick={onNextRound}>
-            ▶ Next round
+          <button className="btn btn-primary btn-sm" onClick={onNextRound}>
+            Next round →
           </button>
         ) : (
-          <span className="text-sm text-white/40">
-            Waiting for host to start the next round…
+          <span className="text-sm text-[var(--faint)]">
+            Waiting for the host to start the next round…
           </span>
         )}
       </div>
@@ -439,10 +458,10 @@ function ControlBar({
 
   if (phase === "challenge") {
     return (
-      <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
-        <p className="text-sm text-white/60">
-          ⚡ Beat the best move count before time runs out! Reset or running out
-          of moves during the countdown costs you a penalty.
+      <div className={shell}>
+        <p className="text-sm text-[var(--muted)]">
+          Beat the best move count before time runs out — resetting or running
+          out of moves costs a penalty.
         </p>
         {giveUpBtn}
       </div>
@@ -451,9 +470,9 @@ function ControlBar({
 
   if (phase === "open") {
     return (
-      <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
-        <p className="text-sm text-white/60">
-          🎯 Race to find a solution — the first one starts the countdown.
+      <div className={shell}>
+        <p className="text-sm text-[var(--muted)]">
+          Race to find a solution — the first one starts the countdown.
         </p>
         {giveUpBtn}
       </div>

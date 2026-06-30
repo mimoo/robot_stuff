@@ -1,71 +1,116 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --color-accent: #6366f1;
-  --color-accent-2: #22d3ee;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-hanken), sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 /*
- * Themes are just CSS variables. Crucially, overriding Tailwind's `--color-white`
- * token per theme flips every `text-white` / `bg-white/x` utility at once, so the
- * light theme gets dark text & faint dark surfaces with no per-element changes.
+ * Themes are CSS variables. Overriding Tailwind's `--color-white` token per
+ * theme flips every `text-white` / `bg-white/x` utility at once — so the light
+ * theme gets dark ink + faint dark surfaces with no per-element changes.
  */
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
+  --color-white: #eef0f6; /* "white" utilities resolve to soft off-white */
+  --bg: #08090d;
   --app-bg:
-    radial-gradient(1200px 700px at 12% -10%, rgba(99, 102, 241, 0.22), transparent 60%),
-    radial-gradient(1000px 700px at 110% 10%, rgba(34, 211, 238, 0.16), transparent 55%),
-    linear-gradient(180deg, #090d1a 0%, #0b1020 100%);
-  --fg: #e7ecff;
-  --panel-a: rgba(27, 34, 56, 0.9);
-  --panel-b: rgba(20, 26, 46, 0.9);
-  --color-edge: #2a3354;
-  --input-bg: rgba(10, 14, 28, 0.7);
-  --panel-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.8);
+    radial-gradient(1100px 720px at 50% -25%, rgba(246, 196, 83, 0.07), transparent 70%),
+    radial-gradient(800px 600px at 100% 0%, rgba(90, 120, 255, 0.05), transparent 60%),
+    #08090d;
+  --fg: var(--color-white);
+  --muted: #969cab;
+  --faint: #5b616f;
+  --panel-a: rgba(22, 24, 32, 0.66);
+  --panel-b: rgba(15, 17, 23, 0.66);
+  --color-edge: rgba(255, 255, 255, 0.08);
+  --edge-strong: rgba(255, 255, 255, 0.14);
+  --input-bg: rgba(255, 255, 255, 0.035);
+  --accent: #f6c453;
+  --accent-ink: #2a1d00;
+  --success: #45dca0;
+  --danger: #ff6173;
+  --wall: #717d9b;
+  --board-bg: #0b0d14;
+  --panel-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px -34px rgba(0, 0, 0, 0.9);
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --color-white: #16213e; /* flips text-white/white-alpha utilities to dark ink */
+  --color-white: #1a1f2b;
+  --bg: #f4f6fb;
   --app-bg:
-    radial-gradient(1200px 700px at 12% -10%, rgba(99, 102, 241, 0.18), transparent 60%),
-    radial-gradient(1000px 700px at 110% 10%, rgba(34, 211, 238, 0.16), transparent 55%),
-    linear-gradient(180deg, #eef2fb 0%, #e3e9f7 100%);
-  --fg: #16213e;
-  --panel-a: rgba(255, 255, 255, 0.92);
-  --panel-b: rgba(244, 247, 253, 0.95);
-  --color-edge: #ccd5ea;
-  --input-bg: rgba(255, 255, 255, 0.8);
-  --panel-shadow: 0 12px 36px -22px rgba(40, 60, 120, 0.45);
+    radial-gradient(1100px 720px at 50% -25%, rgba(246, 196, 83, 0.16), transparent 70%),
+    radial-gradient(820px 600px at 100% 0%, rgba(90, 120, 255, 0.08), transparent 60%),
+    #eef1f8;
+  --fg: var(--color-white);
+  --muted: #5c6477;
+  --faint: #9aa2b4;
+  --panel-a: rgba(255, 255, 255, 0.86);
+  --panel-b: rgba(248, 250, 254, 0.92);
+  --color-edge: rgba(20, 30, 60, 0.1);
+  --edge-strong: rgba(20, 30, 60, 0.18);
+  --input-bg: rgba(255, 255, 255, 0.85);
+  --accent: #d99b1c;
+  --accent-ink: #2a1d00;
+  --success: #11a06e;
+  --danger: #e23a4e;
+  --wall: #9aa6c4;
+  --board-bg: #11141f;
+  --panel-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 24px 50px -34px rgba(40, 60, 120, 0.4);
 }
 
 [data-theme="midnight"] {
   color-scheme: dark;
+  --color-white: #e4e7ff;
   --app-bg:
-    radial-gradient(1100px 700px at 50% -10%, rgba(56, 70, 160, 0.4), transparent 60%),
-    linear-gradient(180deg, #04040a 0%, #07060f 100%);
-  --fg: #dfe3ff;
-  --panel-a: rgba(20, 20, 44, 0.9);
-  --panel-b: rgba(12, 12, 30, 0.92);
-  --color-edge: #28285a;
-  --input-bg: rgba(8, 8, 22, 0.7);
-  --panel-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.9);
+    radial-gradient(1100px 720px at 50% -20%, rgba(86, 100, 220, 0.22), transparent 65%),
+    #050610;
+  --fg: var(--color-white);
+  --muted: #9096c4;
+  --faint: #565d8c;
+  --panel-a: rgba(20, 21, 48, 0.66);
+  --panel-b: rgba(12, 13, 32, 0.7);
+  --color-edge: rgba(150, 160, 255, 0.12);
+  --edge-strong: rgba(150, 160, 255, 0.2);
+  --input-bg: rgba(120, 130, 255, 0.05);
+  --accent: #8ea2ff;
+  --accent-ink: #060818;
+  --success: #56e0b8;
+  --danger: #ff6b86;
+  --wall: #6a76c2;
+  --board-bg: #080a18;
+  --panel-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 24px 60px -34px rgba(0, 0, 0, 0.95);
 }
 
 [data-theme="sunset"] {
   color-scheme: dark;
+  --color-white: #ffeee6;
   --app-bg:
-    radial-gradient(1100px 700px at 10% -10%, rgba(244, 114, 100, 0.3), transparent 60%),
-    radial-gradient(1000px 700px at 110% 10%, rgba(168, 85, 247, 0.25), transparent 55%),
-    linear-gradient(180deg, #1a0f1a 0%, #1d1020 100%);
-  --fg: #ffe9e1;
-  --panel-a: rgba(52, 30, 48, 0.9);
-  --panel-b: rgba(40, 22, 40, 0.92);
-  --color-edge: #56324f;
-  --input-bg: rgba(28, 14, 26, 0.7);
-  --panel-shadow: 0 10px 40px -20px rgba(40, 0, 20, 0.8);
+    radial-gradient(1000px 700px at 8% -15%, rgba(244, 114, 100, 0.26), transparent 60%),
+    radial-gradient(1000px 700px at 108% 8%, rgba(189, 110, 247, 0.22), transparent 55%),
+    #160c17;
+  --fg: var(--color-white);
+  --muted: #c69ca0;
+  --faint: #8a6068;
+  --panel-a: rgba(52, 28, 46, 0.66);
+  --panel-b: rgba(36, 18, 34, 0.72);
+  --color-edge: rgba(255, 200, 190, 0.13);
+  --edge-strong: rgba(255, 200, 190, 0.22);
+  --input-bg: rgba(255, 180, 170, 0.05);
+  --accent: #ff9e6b;
+  --accent-ink: #2a1106;
+  --success: #4fd6a0;
+  --danger: #ff6173;
+  --wall: #b9788c;
+  --board-bg: #160a16;
+  --panel-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 24px 60px -34px rgba(20, 0, 10, 0.9);
 }
 
 html,
@@ -78,121 +123,174 @@ body {
   background-attachment: fixed;
   color: var(--fg);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv01";
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
 }
 
-/* ---- reusable bits ---- */
+/* faint grain overlay for depth — sits behind content (z-index:-1) so it never
+   interferes with fixed/portaled overlays */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* ---- surfaces ---- */
 .panel {
   background: linear-gradient(180deg, var(--panel-a), var(--panel-b));
   border: 1px solid var(--color-edge);
-  border-radius: 1rem;
+  border-radius: 18px;
   box-shadow: var(--panel-shadow);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(14px) saturate(1.2);
 }
 
+.hairline {
+  border-color: var(--color-edge);
+}
+
+/* ---- buttons ---- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
+  font-family: var(--font-sans);
   font-weight: 600;
-  border-radius: 0.75rem;
-  padding: 0.6rem 1.1rem;
-  transition: transform 0.08s ease, filter 0.15s ease, background 0.15s ease;
+  font-size: 0.875rem;
+  line-height: 1;
+  border-radius: 11px;
+  padding: 0.6rem 0.95rem;
+  border: 1px solid transparent;
   cursor: pointer;
   user-select: none;
-  border: 1px solid transparent;
+  white-space: nowrap;
+  transition:
+    transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease;
 }
-.btn:active {
-  transform: translateY(1px) scale(0.99);
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
 }
 .btn:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
-  filter: grayscale(0.3);
 }
+
 .btn-primary {
-  background: linear-gradient(180deg, #6d6ff5, #5457e6);
-  color: white;
-  box-shadow: 0 8px 24px -10px rgba(99, 102, 241, 0.9);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 8px 24px -12px color-mix(in oklab, var(--accent) 90%, transparent);
 }
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
+  box-shadow: 0 10px 28px -10px color-mix(in oklab, var(--accent) 90%, transparent);
 }
+
 .btn-ghost {
-  background: color-mix(in oklab, var(--fg) 7%, transparent);
+  background: color-mix(in oklab, var(--fg) 5%, transparent);
   border-color: var(--color-edge);
   color: var(--fg);
 }
 .btn-ghost:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--fg) 14%, transparent);
-}
-.btn-ready {
-  background: linear-gradient(180deg, #2dd4a7, #14b88a);
-  color: #03261d;
-}
-.btn-danger {
-  background: linear-gradient(180deg, #fb7185, #ef4444);
-  color: white;
+  background: color-mix(in oklab, var(--fg) 9%, transparent);
+  border-color: var(--edge-strong);
 }
 
+.btn-ready {
+  background: color-mix(in oklab, var(--success) 16%, transparent);
+  border-color: color-mix(in oklab, var(--success) 45%, transparent);
+  color: var(--success);
+}
+.btn-ready:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--success) 24%, transparent);
+}
+
+.btn-sm {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.8rem;
+  border-radius: 9px;
+}
+
+/* ---- inputs ---- */
 .input {
   background: var(--input-bg);
   border: 1px solid var(--color-edge);
-  border-radius: 0.75rem;
-  padding: 0.65rem 0.9rem;
+  border-radius: 11px;
+  padding: 0.7rem 0.95rem;
   color: var(--fg);
+  font-family: var(--font-sans);
   outline: none;
   width: 100%;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.input::placeholder {
+  color: var(--faint);
 }
 .input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  border-color: color-mix(in oklab, var(--accent) 60%, var(--color-edge));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.32rem 0.6rem;
+  border-radius: 9px;
+  background: color-mix(in oklab, var(--fg) 5%, transparent);
+  border: 1px solid var(--color-edge);
+  color: var(--muted);
 }
 
 /* ---- animations ---- */
 @keyframes pulse-ring {
-  0% { transform: scale(0.85); opacity: 0.9; }
-  70% { transform: scale(1.25); opacity: 0; }
+  0% { transform: scale(0.7); opacity: 0.55; }
+  80% { transform: scale(1.35); opacity: 0; }
   100% { opacity: 0; }
 }
 @keyframes pop {
-  0% { transform: scale(0.4); opacity: 0; }
-  60% { transform: scale(1.15); opacity: 1; }
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
-@keyframes float-in {
-  from { transform: translateY(8px); opacity: 0; }
+@keyframes rise {
+  from { transform: translateY(10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes fall {
-  to { transform: translateY(110vh) rotate(720deg); opacity: 0.9; }
+  to { transform: translateY(112vh) rotate(680deg); opacity: 0; }
 }
-.animate-pop { animation: pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-.animate-float-in { animation: float-in 0.25s ease both; }
+.animate-pop { animation: pop 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-rise { animation: rise 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-fade { animation: fade-in 0.3s ease both; }
 
-.target-ring::after {
-  content: "";
-  position: absolute;
-  inset: 12%;
-  border-radius: 9999px;
-  border: 2px solid currentColor;
-  animation: pulse-ring 1.6s ease-out infinite;
-}
-
-.champ-banner {
-  background: linear-gradient(90deg, rgba(250, 204, 21, 0.15), rgba(99, 102, 241, 0.15), rgba(250, 204, 21, 0.15));
-  background-size: 200% 100%;
-  animation: shimmer 6s linear infinite;
-}
-
-/* thin scrollbar for chat */
-.scroll-thin::-webkit-scrollbar { width: 8px; }
+/* subtle scrollbars */
+.scroll-thin::-webkit-scrollbar { width: 7px; }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in oklab, var(--fg) 14%, transparent);
   border-radius: 99px;
 }
+.scroll-thin::-webkit-scrollbar-track { background: transparent; }

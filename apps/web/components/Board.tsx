@@ -179,6 +179,7 @@ export default function Board({
 
   const target = puzzle?.target;
   const targetColor = puzzle ? ROBOT_HEX[puzzle.targetForRobot] : "#fff";
+  const reachColor = active != null ? ROBOT_GLOW[active] : "var(--accent)";
   const robotAt = useMemo(() => {
     const m = new Map<string, number>();
     robots.forEach((r, i) => m.set(`${r.x},${r.y}`, i));
@@ -186,9 +187,9 @@ export default function Board({
   }, [robots]);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col items-center gap-2">
-      {/* board area: the board is the largest square that fits this box (cqmin).
-          On small screens it's a width-driven square; on lg it fills the height. */}
+    <div className="flex h-full min-h-0 w-full flex-col items-center gap-2.5">
+      {/* the board is the largest square that fits this area (cqmin), centered.
+          The section gives this area a definite size so the column hugs it. */}
       <div
         className="relative aspect-square w-full min-h-0 lg:aspect-auto lg:flex-1"
         style={{ containerType: "size" }}
@@ -198,11 +199,14 @@ export default function Board({
           style={{ width: "100cqmin", height: "100cqmin" }}
         >
           <div
-            className="relative grid h-full w-full overflow-hidden rounded-xl"
+            className="relative grid h-full w-full overflow-hidden"
             style={{
               gridTemplateColumns: `repeat(${SIZE}, 1fr)`,
-              background: "#0e1426",
-              border: "3px solid #3a4470",
+              background: "var(--board-bg)",
+              borderRadius: "16px",
+              border: "1px solid var(--edge-strong)",
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 40px 80px -50px rgba(0,0,0,0.85)",
             }}
           >
           {cells.map((c) => {
@@ -222,14 +226,13 @@ export default function Board({
                 }
                 className="relative"
                 style={{
-                  background: c.middle
-                    ? "#05070f"
-                    : (c.x + c.y) % 2 === 0
-                      ? "rgba(255,255,255,0.015)"
+                  background:
+                    !c.middle && (c.x + c.y) % 2 === 0
+                      ? "color-mix(in oklab, var(--fg) 3%, transparent)"
                       : "transparent",
                   boxShadow: [
-                    c.right ? "inset -3px 0 0 #8ea0d8" : "",
-                    c.bottom ? "inset 0 -3px 0 #8ea0d8" : "",
+                    c.right ? "inset -2px 0 0 var(--wall)" : "",
+                    c.bottom ? "inset 0 -2px 0 var(--wall)" : "",
                   ]
                     .filter(Boolean)
                     .join(","),
@@ -237,48 +240,92 @@ export default function Board({
                     interactive && (robot != null || reach) ? "pointer" : "default",
                 }}
               >
-                {/* reachable target highlight */}
+                {/* reachable destination — soft dot in the active robot's color */}
                 {reach && (
                   <span
-                    className="pointer-events-none absolute inset-[18%] rounded-full animate-float-in"
+                    className="pointer-events-none absolute inset-[34%] rounded-full animate-fade"
                     style={{
-                      background: "rgba(250, 204, 21, 0.35)",
-                      boxShadow: "0 0 10px 2px rgba(250,204,21,0.45)",
+                      background: reachColor,
+                      boxShadow: `0 0 12px 3px ${reachColor}`,
+                      opacity: 0.85,
                     }}
                   />
                 )}
 
-                {/* target ring */}
+                {/* target reticle */}
                 {isTarget && (
                   <span
-                    className="target-ring pointer-events-none absolute inset-0 flex items-center justify-center"
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
                     style={{ color: targetColor }}
                   >
                     <span
                       className="absolute rounded-full"
+                      style={{ inset: "20%", border: "1.5px solid currentColor", opacity: 0.3 }}
+                    />
+                    <span
+                      className="absolute rounded-full"
                       style={{
-                        inset: "26%",
-                        border: `2px solid ${targetColor}`,
-                        boxShadow: `inset 0 0 6px ${targetColor}`,
+                        inset: "20%",
+                        border: "1.5px solid currentColor",
+                        animation: "pulse-ring 1.9s ease-out infinite",
                       }}
+                    />
+                    <span
+                      className="absolute rounded-full"
+                      style={{ inset: "40%", background: "currentColor" }}
                     />
                   </span>
                 )}
 
-                {/* robot */}
+                {/* robot — glossy disc with a cheeky little face */}
                 {robot != null && (
                   <span
-                    className="absolute inset-[14%] flex items-center justify-center rounded-[28%] animate-pop"
+                    className="absolute inset-[13%] flex items-center justify-center rounded-[32%] animate-pop"
                     style={{
-                      background: `radial-gradient(circle at 35% 30%, ${ROBOT_GLOW[robot]}, ${ROBOT_HEX[robot]})`,
+                      background: `radial-gradient(125% 125% at 32% 24%, ${ROBOT_GLOW[robot]}, ${ROBOT_HEX[robot]} 58%, color-mix(in oklab, ${ROBOT_HEX[robot]} 62%, #000) 100%)`,
                       boxShadow: isActiveRobot
-                        ? `0 0 0 2px #fff, 0 0 14px 3px ${ROBOT_GLOW[robot]}`
-                        : `0 2px 6px rgba(0,0,0,0.5)`,
+                        ? `0 0 0 2px var(--board-bg), 0 0 0 3.5px ${ROBOT_GLOW[robot]}, 0 8px 16px -5px rgba(0,0,0,0.7)`
+                        : `inset 0 1px 1.5px rgba(255,255,255,0.4), 0 5px 12px -4px rgba(0,0,0,0.7)`,
                     }}
                   >
-                    <span className="flex gap-[2px]">
-                      <i className="block h-[14%] min-h-[2px] w-[14%] min-w-[2px] rounded-full bg-white/90" />
-                      <i className="block h-[14%] min-h-[2px] w-[14%] min-w-[2px] rounded-full bg-white/90" />
+                    {/* specular highlight */}
+                    <span
+                      className="absolute rounded-full"
+                      style={{
+                        top: "11%",
+                        left: "18%",
+                        width: "30%",
+                        height: "22%",
+                        background: "rgba(255,255,255,0.6)",
+                        filter: "blur(1.2px)",
+                      }}
+                    />
+                    {/* googly eyes */}
+                    <span className="flex items-center gap-[12%]">
+                      {[0, 1].map((i) => (
+                        <span
+                          key={i}
+                          className="relative flex items-center justify-center rounded-full bg-white"
+                          style={{
+                            width: "26%",
+                            minWidth: "4px",
+                            aspectRatio: "1",
+                            boxShadow: "inset 0 -1px 1px rgba(0,0,0,0.15)",
+                          }}
+                        >
+                          <span
+                            className="rounded-full bg-[#10131c]"
+                            style={{
+                              width: "46%",
+                              aspectRatio: "1",
+                              transform:
+                                active != null && isActiveRobot
+                                  ? "translateY(8%)"
+                                  : "none",
+                            }}
+                          />
+                        </span>
+                      ))}
                     </span>
                   </span>
                 )}
@@ -290,14 +337,15 @@ export default function Board({
                 square (7/16..9/16 of the cell area; absolute so it doesn't
                 disturb the grid's auto-placement) */}
             <div
-              className="pointer-events-none absolute rounded-[2px]"
+              className="pointer-events-none absolute"
               style={{
                 left: "43.75%",
                 top: "43.75%",
                 width: "12.5%",
                 height: "12.5%",
-                background: "#05070f",
-                boxShadow: "inset 0 0 0 3px #8ea0d8",
+                background: "color-mix(in oklab, var(--board-bg) 80%, #000)",
+                borderRadius: "4px",
+                boxShadow: "inset 0 0 0 2px var(--wall)",
               }}
             />
           </div>
@@ -316,20 +364,25 @@ export default function Board({
       </div>
 
       {/* attempt HUD */}
-      <div className="flex w-full max-w-[560px] shrink-0 items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm">
-          <span className="rounded-lg bg-white/5 px-3 py-1.5 font-mono">
-            Your moves:{" "}
-            <b className="text-base text-white">{moves.length}</b>
+      <div className="flex w-full shrink-0 items-center justify-between gap-3 px-1 text-sm">
+        <div className="flex items-center gap-2.5">
+          <span className="text-[var(--muted)]">
+            moves{" "}
+            <b className="ml-0.5 font-mono text-base text-[var(--fg)] tabular-nums">
+              {moves.length}
+            </b>
           </span>
           {championMoves != null && (
-            <span className="rounded-lg bg-amber-400/10 px-3 py-1.5 text-amber-200">
-              Beat: <b>{championMoves}</b>
+            <span className="text-[var(--muted)]">
+              · beat{" "}
+              <b className="font-mono text-[var(--accent)] tabular-nums">
+                {championMoves}
+              </b>
             </span>
           )}
         </div>
         <button
-          className="btn btn-ghost"
+          className="btn btn-ghost btn-sm"
           onClick={handleReset}
           disabled={!interactive || moves.length === 0}
           title={
