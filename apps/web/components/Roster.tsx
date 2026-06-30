@@ -34,13 +34,14 @@ export default function Roster({
           return (
             <li
               key={p.id}
-              className="flex items-center gap-2.5 rounded-xl px-2 py-1.5"
+              className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition-opacity"
               style={{
                 background: isChamp
                   ? "rgba(250,204,21,0.10)"
                   : "rgba(255,255,255,0.03)",
                 outline:
                   p.id === myId ? "1px solid rgba(99,102,241,0.55)" : "none",
+                opacity: p.connected ? 1 : 0.5,
               }}
             >
               <span
@@ -66,7 +67,9 @@ export default function Roster({
                   {isChamp && <span title="Current champion">🏆</span>}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-white/50">
-                  {phase === "lobby" ? (
+                  {!p.connected ? (
+                    <span className="text-amber-400/70">📴 away</span>
+                  ) : phase === "lobby" ? (
                     <span className={p.ready ? "text-emerald-400" : ""}>
                       {p.ready ? "✓ ready" : "not ready"}
                     </span>

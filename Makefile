@@ -9,6 +9,9 @@
 
 HOST        ?= robot-game
 PUBLIC_HOST ?= 91.98.36.131
+# Public domain served over HTTPS by Caddy (reverse proxy on the server).
+# Leave empty to serve plain HTTP on :3000/:3001 via PUBLIC_HOST instead.
+DOMAIN      ?= robots.davidwong.fr
 REPO        ?= git@github.com:mimoo/robot_stuff.git
 BRANCH      ?= main
 APP_DIR     ?= /opt/robot-game
@@ -53,8 +56,8 @@ redeploy:
 # internal: run the remote provisioning/build/restart script over SSH
 _remote:
 	@echo "==> Deploying on $(HOST)"
-	@ssh $(HOST) "APP_DIR='$(APP_DIR)' REPO='$(REPO)' BRANCH='$(BRANCH)' PUBLIC_HOST='$(PUBLIC_HOST)' bash -s" < deploy/remote-deploy.sh
-	@echo "==> Live at http://$(PUBLIC_HOST):3000"
+	@ssh $(HOST) "APP_DIR='$(APP_DIR)' REPO='$(REPO)' BRANCH='$(BRANCH)' PUBLIC_HOST='$(PUBLIC_HOST)' DOMAIN='$(DOMAIN)' bash -s" < deploy/remote-deploy.sh
+	@if [ -n "$(DOMAIN)" ]; then echo "==> Live at https://$(DOMAIN)"; else echo "==> Live at http://$(PUBLIC_HOST):3000"; fi
 
 logs:
 	@ssh $(HOST) 'journalctl -u robot-web -u robot-server -n 150 -f'

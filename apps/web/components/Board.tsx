@@ -152,13 +152,24 @@ export default function Board({
       bottom: boolean;
       middle: boolean;
     }[] = [];
+    const inBox = (x: number, y: number) => b.inMiddleBox({ x, y });
     for (let y = 0; y < SIZE; y++) {
       for (let x = 0; x < SIZE; x++) {
         grid.push({
           x,
           y,
-          right: b.hasWall({ x, y }, "right") && x < SIZE - 1,
-          bottom: b.hasWall({ x, y }, "down") && y < SIZE - 1,
+          // suppress wall lines that touch the center box — it's drawn as one
+          // clean bordered square instead (avoids doubled/offset bars)
+          right:
+            b.hasWall({ x, y }, "right") &&
+            x < SIZE - 1 &&
+            !inBox(x, y) &&
+            !inBox(x + 1, y),
+          bottom:
+            b.hasWall({ x, y }, "down") &&
+            y < SIZE - 1 &&
+            !inBox(x, y) &&
+            !inBox(x, y + 1),
           middle: b.inMiddleBox({ x, y }),
         });
       }
@@ -187,7 +198,7 @@ export default function Board({
           style={{ width: "100cqmin", height: "100cqmin" }}
         >
           <div
-            className="grid h-full w-full overflow-hidden rounded-xl"
+            className="relative grid h-full w-full overflow-hidden rounded-xl"
             style={{
               gridTemplateColumns: `repeat(${SIZE}, 1fr)`,
               background: "#0e1426",
@@ -274,7 +285,22 @@ export default function Board({
               </div>
             );
           })}
-        </div>
+
+            {/* the fixed center 2x2 box, drawn as one fully-closed bordered
+                square (7/16..9/16 of the cell area; absolute so it doesn't
+                disturb the grid's auto-placement) */}
+            <div
+              className="pointer-events-none absolute rounded-[2px]"
+              style={{
+                left: "43.75%",
+                top: "43.75%",
+                width: "12.5%",
+                height: "12.5%",
+                background: "#05070f",
+                boxShadow: "inset 0 0 0 3px #8ea0d8",
+              }}
+            />
+          </div>
 
           {flash && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
