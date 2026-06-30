@@ -1,9 +1,9 @@
-# Nuxt dev/build outputs
+# Build outputs
+.next
 .output
-.nuxt
-.nitro
-.cache
 dist
+out
+*.tsbuildinfo
 
 # Node dependencies
 node_modules
@@ -21,3 +21,6 @@ logs
 .env
 .env.*
 !.env.example
+
+# Bun
+bun.lockb

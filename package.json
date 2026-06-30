@@ -1,21 +1,17 @@
 {
-  "name": "nuxt-app",
+  "name": "robot-stuff",
   "private": true,
+  "version": "1.0.0",
+  "workspaces": ["shared", "apps/*"],
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "dev": "concurrently -n server,web -c magenta,cyan \"bun run dev:server\" \"bun run dev:web\"",
+    "dev:server": "bun --hot apps/server/index.ts",
+    "dev:web": "cd apps/web && node node_modules/.bin/next dev",
+    "build:web": "cd apps/web && node node_modules/.bin/next build",
+    "start:server": "bun apps/server/index.ts",
+    "test": "bun test shared"
   },
   "devDependencies": {
-    "@nuxt/devtools": "latest",
-    "@nuxtjs/tailwindcss": "^6.8.0",
-    "@types/node": "^18.16.19",
-    "daisyui": "^3.2.1",
-    "nuxt": "^3.6.2"
-  },
-  "dependencies": {
-    "nuxt-icon": "^0.4.2"
+    "concurrently": "^9.1.0"
   }
 }

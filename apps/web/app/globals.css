@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-accent: #6366f1;
+  --color-accent-2: #22d3ee;
+}
+
+/*
+ * Themes are just CSS variables. Crucially, overriding Tailwind's `--color-white`
+ * token per theme flips every `text-white` / `bg-white/x` utility at once, so the
+ * light theme gets dark text & faint dark surfaces with no per-element changes.
+ */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg:
+    radial-gradient(1200px 700px at 12% -10%, rgba(99, 102, 241, 0.22), transparent 60%),
+    radial-gradient(1000px 700px at 110% 10%, rgba(34, 211, 238, 0.16), transparent 55%),
+    linear-gradient(180deg, #090d1a 0%, #0b1020 100%);
+  --fg: #e7ecff;
+  --panel-a: rgba(27, 34, 56, 0.9);
+  --panel-b: rgba(20, 26, 46, 0.9);
+  --color-edge: #2a3354;
+  --input-bg: rgba(10, 14, 28, 0.7);
+  --panel-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-white: #16213e; /* flips text-white/white-alpha utilities to dark ink */
+  --app-bg:
+    radial-gradient(1200px 700px at 12% -10%, rgba(99, 102, 241, 0.18), transparent 60%),
+    radial-gradient(1000px 700px at 110% 10%, rgba(34, 211, 238, 0.16), transparent 55%),
+    linear-gradient(180deg, #eef2fb 0%, #e3e9f7 100%);
+  --fg: #16213e;
+  --panel-a: rgba(255, 255, 255, 0.92);
+  --panel-b: rgba(244, 247, 253, 0.95);
+  --color-edge: #ccd5ea;
+  --input-bg: rgba(255, 255, 255, 0.8);
+  --panel-shadow: 0 12px 36px -22px rgba(40, 60, 120, 0.45);
+}
+
+[data-theme="midnight"] {
+  color-scheme: dark;
+  --app-bg:
+    radial-gradient(1100px 700px at 50% -10%, rgba(56, 70, 160, 0.4), transparent 60%),
+    linear-gradient(180deg, #04040a 0%, #07060f 100%);
+  --fg: #dfe3ff;
+  --panel-a: rgba(20, 20, 44, 0.9);
+  --panel-b: rgba(12, 12, 30, 0.92);
+  --color-edge: #28285a;
+  --input-bg: rgba(8, 8, 22, 0.7);
+  --panel-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="sunset"] {
+  color-scheme: dark;
+  --app-bg:
+    radial-gradient(1100px 700px at 10% -10%, rgba(244, 114, 100, 0.3), transparent 60%),
+    radial-gradient(1000px 700px at 110% 10%, rgba(168, 85, 247, 0.25), transparent 55%),
+    linear-gradient(180deg, #1a0f1a 0%, #1d1020 100%);
+  --fg: #ffe9e1;
+  --panel-a: rgba(52, 30, 48, 0.9);
+  --panel-b: rgba(40, 22, 40, 0.92);
+  --color-edge: #56324f;
+  --input-bg: rgba(28, 14, 26, 0.7);
+  --panel-shadow: 0 10px 40px -20px rgba(40, 0, 20, 0.8);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--app-bg);
+  background-attachment: fixed;
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- reusable bits ---- */
+.panel {
+  background: linear-gradient(180deg, var(--panel-a), var(--panel-b));
+  border: 1px solid var(--color-edge);
+  border-radius: 1rem;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(6px);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.6rem 1.1rem;
+  transition: transform 0.08s ease, filter 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+.btn-primary {
+  background: linear-gradient(180deg, #6d6ff5, #5457e6);
+  color: white;
+  box-shadow: 0 8px 24px -10px rgba(99, 102, 241, 0.9);
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.btn-ghost {
+  background: color-mix(in oklab, var(--fg) 7%, transparent);
+  border-color: var(--color-edge);
+  color: var(--fg);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--fg) 14%, transparent);
+}
+.btn-ready {
+  background: linear-gradient(180deg, #2dd4a7, #14b88a);
+  color: #03261d;
+}
+.btn-danger {
+  background: linear-gradient(180deg, #fb7185, #ef4444);
+  color: white;
+}
+
+.input {
+  background: var(--input-bg);
+  border: 1px solid var(--color-edge);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  color: var(--fg);
+  outline: none;
+  width: 100%;
+}
+.input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+/* ---- animations ---- */
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 0.9; }
+  70% { transform: scale(1.25); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes float-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0.9; }
+}
+.animate-pop { animation: pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-float-in { animation: float-in 0.25s ease both; }
+
+.target-ring::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  animation: pulse-ring 1.6s ease-out infinite;
+}
+
+.champ-banner {
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.15), rgba(99, 102, 241, 0.15), rgba(250, 204, 21, 0.15));
+  background-size: 200% 100%;
+  animation: shimmer 6s linear infinite;
+}
+
+/* thin scrollbar for chat */
+.scroll-thin::-webkit-scrollbar { width: 8px; }
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+}
