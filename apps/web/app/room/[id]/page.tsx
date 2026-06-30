@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { Move } from "@robot/shared/game";
-import Board from "@/components/Board";
+import Board, { type BoardHandle } from "@/components/Board";
 import Roster from "@/components/Roster";
 import Chat from "@/components/Chat";
 import SettingsPanel from "@/components/Settings";
@@ -33,6 +33,11 @@ export default function RoomPage() {
   const [nameDraft, setNameDraft] = useState("");
   // Show a name step before joining a room we haven't confirmed yet this session.
   const [confirmed, setConfirmed] = useState(false);
+
+  // the board reports its live move count up so we can show it (and the reset
+  // button) in the toolbar above the board instead of under it
+  const boardRef = useRef<BoardHandle>(null);
+  const [attemptMoves, setAttemptMoves] = useState(0);
 
   useEffect(() => {
     setPlayerId(getPlayerId());
@@ -251,9 +256,11 @@ export default function RoomPage() {
             height (no top/bottom gaps); it's only capped to avoid horizontal
             overflow. cqmin inside guarantees the board never overflows. */}
         <section className="flex min-h-0 w-full flex-col gap-2.5 lg:w-[calc(100dvh_-_17.5rem)] lg:max-w-[min(1020px,calc(100vw_-_25rem))]">
-          {/* status strip */}
-          <div className="flex h-9 shrink-0 items-center justify-between gap-3">
-            <div className="min-w-0">
+          {/* toolbar — status, moves, timer, reset and the action buttons all
+              live above the board, so nothing sits under it and the board can
+              fill the full height */}
+          <div className="flex min-h-9 shrink-0 flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="mr-auto min-w-0">
               {champion ? (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-base text-[var(--accent)]">★</span>
@@ -266,60 +273,65 @@ export default function RoomPage() {
                     <span className="font-medium">{champion.name}</span>
                   </span>
                 </div>
+              ) : phase === "lobby" ? (
+                <span className="text-sm text-[var(--muted)]">
+                  Ready up to start the round.
+                </span>
               ) : phase === "open" ? (
                 <span className="text-sm text-[var(--muted)]">
                   Slide the matching robot onto the target.
                 </span>
+              ) : phase === "roundEnd" ? (
+                <span className="text-sm text-[var(--muted)]">Round over 🎉</span>
               ) : null}
             </div>
 
+            {(phase === "open" || phase === "challenge") && (
+              <span className="text-sm text-[var(--muted)]">
+                moves{" "}
+                <b className="font-mono text-base text-[var(--fg)] tabular-nums">
+                  {attemptMoves}
+                </b>
+                {champion != null && (
+                  <>
+                    {" · beat "}
+                    <b className="font-mono text-[var(--accent)] tabular-nums">
+                      {champion.moves}
+                    </b>
+                  </>
+                )}
+              </span>
+            )}
+
             {challengeLeft != null && (
               <div
-                className="flex items-center gap-1.5 font-mono text-2xl font-semibold tabular-nums transition-colors"
+                className="flex items-center gap-1.5 font-mono text-xl font-semibold tabular-nums transition-colors"
                 style={{
                   color: challengeLeft <= 10 ? "var(--danger)" : "var(--fg)",
                 }}
               >
-                <span className="text-sm text-[var(--muted)]">⏱</span>
+                <span className="text-xs text-[var(--muted)]">⏱</span>
                 {Math.floor(challengeLeft / 60)}:
                 {String(challengeLeft % 60).padStart(2, "0")}
               </div>
             )}
-          </div>
 
-          {/* board (fills remaining height) with overlays aligned to it */}
-          <Board
-            puzzle={state?.puzzle ?? null}
-            phase={phase}
-            championMoves={champion?.moves ?? null}
-            locked={boardLocked}
-            onSolved={submitSolution}
-            onPenalty={(reason) => api.reportPenalty(reason)}
-          >
-            {phase === "paused" && <PausedOverlay />}
-            {phase !== "paused" && penaltyActive && (
-              <PenaltyOverlay until={penalizedUntil!} now={now} />
+            {(phase === "open" || phase === "challenge") && (
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => boardRef.current?.reset()}
+                disabled={boardLocked || attemptMoves === 0}
+                title={
+                  phase === "challenge"
+                    ? "Resetting during the countdown costs you a penalty!"
+                    : "Reset your robots"
+                }
+              >
+                ↺ Reset
+              </button>
             )}
-            {phase !== "paused" &&
-              !penaltyActive &&
-              phase === "starting" &&
-              state?.startCountdownEndsAt && (
-                <StartCountdown endsAt={state.startCountdownEndsAt} now={now} />
-              )}
-            {phase !== "paused" && !penaltyActive && phase === "lobby" && (
-              <WaitingOverlay text="Waiting for everyone to ready up…" />
-            )}
-            {phase !== "paused" &&
-              !penaltyActive &&
-              meGaveUp &&
-              (phase === "open" || phase === "challenge") && (
-                <WaitingOverlay text="🏳️ You gave up — waiting for the round to end." />
-              )}
-          </Board>
 
-          {/* control bar */}
-          <div className="shrink-0">
-            <ControlBar
+            <RoomActions
               phase={phase}
               isHost={isHost}
               ready={me?.ready ?? false}
@@ -330,6 +342,40 @@ export default function RoomPage() {
               onNextRound={api.nextRound}
               onGiveUp={api.giveUp}
             />
+          </div>
+
+          {/* board fills the remaining height */}
+          <div className="flex min-h-0 w-full flex-1 flex-col">
+            <Board
+              ref={boardRef}
+              puzzle={state?.puzzle ?? null}
+              phase={phase}
+              championMoves={champion?.moves ?? null}
+              locked={boardLocked}
+              onSolved={submitSolution}
+              onPenalty={(reason) => api.reportPenalty(reason)}
+              onMovesChange={setAttemptMoves}
+            >
+              {phase === "paused" && <PausedOverlay />}
+              {phase !== "paused" && penaltyActive && (
+                <PenaltyOverlay until={penalizedUntil!} now={now} />
+              )}
+              {phase !== "paused" &&
+                !penaltyActive &&
+                phase === "starting" &&
+                state?.startCountdownEndsAt && (
+                  <StartCountdown endsAt={state.startCountdownEndsAt} now={now} />
+                )}
+              {phase !== "paused" && !penaltyActive && phase === "lobby" && (
+                <WaitingOverlay text="Waiting for everyone to ready up…" />
+              )}
+              {phase !== "paused" &&
+                !penaltyActive &&
+                meGaveUp &&
+                (phase === "open" || phase === "challenge") && (
+                  <WaitingOverlay text="🏳️ You gave up — waiting for the round to end." />
+                )}
+            </Board>
           </div>
         </section>
 
@@ -380,7 +426,7 @@ export default function RoomPage() {
   );
 }
 
-function ControlBar({
+function RoomActions({
   phase,
   isHost,
   ready,
@@ -401,9 +447,37 @@ function ControlBar({
   onNextRound: () => void;
   onGiveUp: () => void;
 }) {
+  if (phase === "lobby") {
+    return (
+      <div className="flex items-center gap-2">
+        {isHost && (
+          <button className="btn btn-ghost btn-sm" onClick={onStart}>
+            Start now
+          </button>
+        )}
+        <button
+          className={`btn btn-sm ${ready ? "btn-ghost" : "btn-ready"}`}
+          onClick={() => onReady(!ready)}
+        >
+          {ready ? "✓ Ready" : "I'm ready"}
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "roundEnd") {
+    return isHost ? (
+      <button className="btn btn-primary btn-sm" onClick={onNextRound}>
+        Next round →
+      </button>
+    ) : (
+      <span className="text-sm text-[var(--faint)]">Waiting for host…</span>
+    );
+  }
+
   // a player can concede while a round is live (the champion has no reason to)
-  const giveUpBtn =
-    (phase === "open" || phase === "challenge") && !isChampion ? (
+  if ((phase === "open" || phase === "challenge") && !isChampion) {
+    return (
       <button
         className="btn btn-ghost btn-sm"
         onClick={onGiveUp}
@@ -412,71 +486,6 @@ function ControlBar({
       >
         {gaveUp ? "Gave up" : "Give up"}
       </button>
-    ) : null;
-
-  const shell =
-    "panel flex flex-wrap items-center justify-between gap-3 px-4 py-3";
-
-  if (phase === "lobby") {
-    return (
-      <div className={shell}>
-        <p className="text-sm text-[var(--muted)]">
-          Mark ready — the game starts when everyone&apos;s set.
-        </p>
-        <div className="flex gap-2">
-          {isHost && (
-            <button className="btn btn-ghost btn-sm" onClick={onStart}>
-              Start now
-            </button>
-          )}
-          <button
-            className={`btn btn-sm ${ready ? "btn-ghost" : "btn-ready"}`}
-            onClick={() => onReady(!ready)}
-          >
-            {ready ? "✓ Ready (cancel)" : "I'm ready"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (phase === "roundEnd") {
-    return (
-      <div className={shell}>
-        <p className="text-sm text-[var(--muted)]">Round over 🎉</p>
-        {isHost ? (
-          <button className="btn btn-primary btn-sm" onClick={onNextRound}>
-            Next round →
-          </button>
-        ) : (
-          <span className="text-sm text-[var(--faint)]">
-            Waiting for the host to start the next round…
-          </span>
-        )}
-      </div>
-    );
-  }
-
-  if (phase === "challenge") {
-    return (
-      <div className={shell}>
-        <p className="text-sm text-[var(--muted)]">
-          Beat the best move count before time runs out — resetting or running
-          out of moves costs a penalty.
-        </p>
-        {giveUpBtn}
-      </div>
-    );
-  }
-
-  if (phase === "open") {
-    return (
-      <div className={shell}>
-        <p className="text-sm text-[var(--muted)]">
-          Race to find a solution — the first one starts the countdown.
-        </p>
-        {giveUpBtn}
-      </div>
     );
   }
 

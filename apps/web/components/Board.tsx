@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Board as GameBoard,
   DIRECTIONS,
@@ -24,23 +31,33 @@ function puzzleKey(p: Puzzle): string {
   );
 }
 
-export default function Board({
-  puzzle,
-  phase,
-  championMoves,
-  locked,
-  onSolved,
-  onPenalty,
-  children,
-}: {
-  puzzle: Puzzle | null;
-  phase: Phase;
-  championMoves: number | null;
-  locked: boolean;
-  onSolved: (moves: Move[]) => void;
-  onPenalty: (reason: "reset" | "exhausted") => void;
-  children?: React.ReactNode;
-}) {
+export type BoardHandle = { reset: () => void };
+
+const Board = forwardRef<
+  BoardHandle,
+  {
+    puzzle: Puzzle | null;
+    phase: Phase;
+    championMoves: number | null;
+    locked: boolean;
+    onSolved: (moves: Move[]) => void;
+    onPenalty: (reason: "reset" | "exhausted") => void;
+    onMovesChange?: (count: number) => void;
+    children?: React.ReactNode;
+  }
+>(function Board(
+  {
+    puzzle,
+    phase,
+    championMoves,
+    locked,
+    onSolved,
+    onPenalty,
+    onMovesChange,
+    children,
+  },
+  ref,
+) {
   const boardRef = useRef<GameBoard | null>(null);
   const [robots, setRobots] = useState<Tile[]>([]);
   const [moves, setMoves] = useState<Move[]>([]);
@@ -140,6 +157,13 @@ export default function Board({
     if (phase === "challenge") onPenalty("reset");
     resetAttempt();
   }
+
+  // expose reset + report the live move count so the parent can render the HUD
+  useImperativeHandle(ref, () => ({ reset: handleReset }));
+  useEffect(() => {
+    onMovesChange?.(moves.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moves]);
 
   // Static cell geometry (walls) — only depends on the default board layout.
   const cells = useMemo(() => {
@@ -363,37 +387,8 @@ export default function Board({
         </div>
       </div>
 
-      {/* attempt HUD */}
-      <div className="flex w-full shrink-0 items-center justify-between gap-3 px-1 text-sm">
-        <div className="flex items-center gap-2.5">
-          <span className="text-[var(--muted)]">
-            moves{" "}
-            <b className="ml-0.5 font-mono text-base text-[var(--fg)] tabular-nums">
-              {moves.length}
-            </b>
-          </span>
-          {championMoves != null && (
-            <span className="text-[var(--muted)]">
-              · beat{" "}
-              <b className="font-mono text-[var(--accent)] tabular-nums">
-                {championMoves}
-              </b>
-            </span>
-          )}
-        </div>
-        <button
-          className="btn btn-ghost btn-sm"
-          onClick={handleReset}
-          disabled={!interactive || moves.length === 0}
-          title={
-            phase === "challenge"
-              ? "Resetting during the countdown costs you a penalty!"
-              : "Reset your robots"
-          }
-        >
-          ↺ Reset
-        </button>
-      </div>
     </div>
   );
-}
+});
+
+export default Board;

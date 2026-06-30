@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Settings } from "@robot/shared/protocol";
 
 export default function SettingsPanel({
@@ -11,13 +12,34 @@ export default function SettingsPanel({
   editable: boolean;
   onChange: (s: Partial<Settings>) => void;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <div>
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-        Game settings
-      </h2>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)] transition-colors hover:text-[var(--fg)]"
+      >
+        <span>Game settings</span>
+        <span className="flex items-center gap-2">
+          {!open && (
+            <span className="font-mono lowercase tracking-normal text-[var(--faint)]">
+              {settings.countdownSeconds}s · {settings.penaltySeconds}s
+            </span>
+          )}
+          <span
+            className="transition-transform"
+            style={{ transform: open ? "rotate(180deg)" : "none" }}
+          >
+            ⌄
+          </span>
+        </span>
+      </button>
 
-      <label className="mb-4 block">
+      {!open ? null : (
+        <div className="mt-3.5">
+          <label className="mb-4 block">
         <div className="mb-1.5 flex items-baseline justify-between">
           <span className="text-sm text-[var(--muted)]">
             Challenge countdown
@@ -67,10 +89,12 @@ export default function SettingsPanel({
         </p>
       </label>
 
-      {!editable && (
-        <p className="mt-3 text-xs text-[var(--faint)]">
-          Only the host can change settings, and only in the lobby.
-        </p>
+          {!editable && (
+            <p className="mt-3 text-xs text-[var(--faint)]">
+              Only the host can change settings, and only in the lobby.
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
