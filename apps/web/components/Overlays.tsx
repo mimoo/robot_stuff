@@ -87,6 +87,39 @@ export function WaitingOverlay({ text }: { text: string }) {
   );
 }
 
+export function ChallengeStartOverlay({
+  championName,
+  moves,
+}: {
+  championName?: string | null;
+  moves?: number | null;
+}) {
+  return (
+    <Cover bg="rgba(8,11,26,0.9)">
+      <div className="animate-pop text-6xl">⏱️</div>
+      <div className="mt-3 animate-pop text-3xl font-black text-white drop-shadow-[0_0_24px_rgba(99,102,241,0.7)]">
+        The clock is ticking!
+      </div>
+      <p className="mt-2 max-w-xs text-sm text-white/70">
+        {championName ? (
+          <>
+            <b className="text-white">{championName}</b> solved it
+            {moves != null ? (
+              <>
+                {" in "}
+                <b className="text-white">{moves}</b> moves
+              </>
+            ) : null}
+            . Beat it before time runs out!
+          </>
+        ) : (
+          <>Someone solved it — race to beat their move count!</>
+        )}
+      </p>
+    </Cover>
+  );
+}
+
 export function Confetti() {
   const pieces = useMemo(() => {
     const colors = ["#f43f5e", "#3b82f6", "#22c55e", "#a855f7", "#f59e0b", "#22d3ee"];

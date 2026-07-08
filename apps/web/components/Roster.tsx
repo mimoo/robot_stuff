@@ -51,10 +51,11 @@ export default function Roster({
               }}
             >
               <span
-                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold text-black/80"
+                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold text-[var(--fg)]"
                 style={{
-                  background: `radial-gradient(120% 120% at 32% 24%, color-mix(in oklab, ${p.color} 70%, #fff), ${p.color})`,
-                  boxShadow: "0 2px 6px -2px rgba(0,0,0,0.5)",
+                  background:
+                    "color-mix(in oklab, var(--fg) 12%, var(--panel-b, transparent))",
+                  boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--fg) 10%, transparent)",
                 }}
               >
                 {p.name.slice(0, 1).toUpperCase()}
@@ -90,7 +91,7 @@ export default function Roster({
                 <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
                   {!p.connected ? (
                     <span style={{ color: "var(--accent)" }}>away</span>
-                  ) : phase === "lobby" ? (
+                  ) : phase === "lobby" || phase === "roundEnd" ? (
                     <span style={{ color: p.ready ? "var(--success)" : undefined }}>
                       {p.ready ? "ready" : "not ready"}
                     </span>

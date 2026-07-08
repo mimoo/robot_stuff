@@ -10,6 +10,7 @@ import {
 } from "react";
 import {
   Board as GameBoard,
+  boardFromPuzzle,
   DIRECTIONS,
   SIZE,
   type Direction,
@@ -40,6 +41,7 @@ const Board = forwardRef<
     phase: Phase;
     championMoves: number | null;
     locked: boolean;
+    solution?: Move[] | null;
     onSolved: (moves: Move[]) => void;
     onPenalty: (reason: "reset" | "exhausted") => void;
     onMovesChange?: (count: number) => void;
@@ -51,6 +53,7 @@ const Board = forwardRef<
     phase,
     championMoves,
     locked,
+    solution,
     onSolved,
     onPenalty,
     onMovesChange,
@@ -64,12 +67,20 @@ const Board = forwardRef<
   const [active, setActive] = useState<number | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
 
+  // ---- round-end replay of the winning solution ----
+  const [replayStep, setReplayStep] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const replayMoves = solution ?? [];
+  const replayMode =
+    phase === "roundEnd" && puzzle != null && replayMoves.length > 0;
+
   const interactive =
     !locked && puzzle != null && (phase === "open" || phase === "challenge");
 
   // (Re)build the local attempt board whenever the puzzle changes.
   const key = puzzle ? puzzleKey(puzzle) : "none";
   useEffect(() => {
+    setFlash(null);
     if (!puzzle) {
       boardRef.current = null;
       setRobots([]);
@@ -84,8 +95,39 @@ const Board = forwardRef<
     setRobots(b.robots.map((t) => ({ ...t })));
     setMoves([]);
     setActive(null);
+    setReplayStep(0);
+    setPlaying(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
+
+  // Drive the board robots to the given step of the winning solution.
+  useEffect(() => {
+    if (!replayMode || !puzzle) return;
+    const b = boardFromPuzzle(puzzle);
+    for (let i = 0; i < replayStep && i < replayMoves.length; i++) {
+      const mv = replayMoves[i];
+      const dest = b.slide(mv.robot, mv.dir);
+      if (!dest) break;
+      b.moveRobot(mv.robot, dest);
+    }
+    setRobots(b.robots.map((t) => ({ ...t })));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replayMode, replayStep, key]);
+
+  // Auto-advance while playing.
+  useEffect(() => {
+    if (!replayMode || !playing) return;
+    if (replayStep >= replayMoves.length) {
+      setPlaying(false);
+      return;
+    }
+    const t = window.setTimeout(
+      () => setReplayStep((s) => Math.min(s + 1, replayMoves.length)),
+      700,
+    );
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replayMode, playing, replayStep]);
 
   // Reset the local attempt back to the puzzle start (used after penalty/solve).
   const resetAttempt = (silent = false) => {
@@ -387,6 +429,52 @@ const Board = forwardRef<
         </div>
       </div>
 
+      {replayMode && (
+        <div className="flex shrink-0 items-center gap-2 rounded-xl bg-[color-mix(in_oklab,var(--fg)_6%,transparent)] px-2.5 py-1.5">
+          <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
+            ★ Winning solution
+          </span>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              setPlaying(false);
+              setReplayStep((s) => Math.max(0, s - 1));
+            }}
+            disabled={replayStep === 0}
+            title="Previous move"
+          >
+            ◀
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              if (replayStep >= replayMoves.length) {
+                setReplayStep(0);
+                setPlaying(true);
+              } else {
+                setPlaying((p) => !p);
+              }
+            }}
+            title={playing ? "Pause" : "Play"}
+          >
+            {playing ? "❚❚" : replayStep >= replayMoves.length ? "↺" : "▶"}
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              setPlaying(false);
+              setReplayStep((s) => Math.min(replayMoves.length, s + 1));
+            }}
+            disabled={replayStep >= replayMoves.length}
+            title="Next move"
+          >
+            ▶
+          </button>
+          <span className="ml-1 font-mono text-sm tabular-nums text-[var(--muted)]">
+            {replayStep} / {replayMoves.length}
+          </span>
+        </div>
+      )}
     </div>
   );
 });

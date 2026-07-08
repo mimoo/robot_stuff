@@ -8,6 +8,7 @@ import Roster from "@/components/Roster";
 import Chat from "@/components/Chat";
 import SettingsPanel from "@/components/Settings";
 import {
+  ChallengeStartOverlay,
   Confetti,
   PausedOverlay,
   PenaltyOverlay,
@@ -82,6 +83,19 @@ export default function RoomPage() {
       return () => clearTimeout(t);
     }
     prevPhase.current = phase;
+  }, [phase]);
+
+  // ---- announce the countdown starting (first solution → challenge) ----
+  const [challengeStarted, setChallengeStarted] = useState(false);
+  const prevChallengePhase = useRef(phase);
+  useEffect(() => {
+    if (prevChallengePhase.current !== "challenge" && phase === "challenge") {
+      setChallengeStarted(true);
+      const t = setTimeout(() => setChallengeStarted(false), 2600);
+      prevChallengePhase.current = phase;
+      return () => clearTimeout(t);
+    }
+    prevChallengePhase.current = phase;
   }, [phase]);
 
   // ---- transient toast from solution acks ----
@@ -352,11 +366,21 @@ export default function RoomPage() {
               phase={phase}
               championMoves={champion?.moves ?? null}
               locked={boardLocked}
+              solution={state?.solution ?? null}
               onSolved={submitSolution}
               onPenalty={(reason) => api.reportPenalty(reason)}
               onMovesChange={setAttemptMoves}
             >
               {phase === "paused" && <PausedOverlay />}
+              {phase === "challenge" &&
+                challengeStarted &&
+                !penaltyActive &&
+                !meGaveUp && (
+                  <ChallengeStartOverlay
+                    championName={champion?.name}
+                    moves={champion?.moves}
+                  />
+                )}
               {phase !== "paused" && penaltyActive && (
                 <PenaltyOverlay until={penalizedUntil!} now={now} />
               )}
@@ -466,12 +490,21 @@ function RoomActions({
   }
 
   if (phase === "roundEnd") {
-    return isHost ? (
-      <button className="btn btn-primary btn-sm" onClick={onNextRound}>
-        Next round →
-      </button>
-    ) : (
-      <span className="text-sm text-[var(--faint)]">Waiting for host…</span>
+    // Everyone readies up to advance; the host can also force it immediately.
+    return (
+      <div className="flex items-center gap-2">
+        {isHost && (
+          <button className="btn btn-ghost btn-sm" onClick={onNextRound}>
+            Next round →
+          </button>
+        )}
+        <button
+          className={`btn btn-sm ${ready ? "btn-ghost" : "btn-ready"}`}
+          onClick={() => onReady(!ready)}
+        >
+          {ready ? "✓ Ready" : "Ready for next"}
+        </button>
+      </div>
     );
   }
 

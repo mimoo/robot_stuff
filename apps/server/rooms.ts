@@ -47,6 +47,7 @@ type Room = {
   settings: Settings;
   game: Game | null;
   champion: Champion | null;
+  championSolution: Move[] | null; // the champion's winning move sequence
   phase: Phase;
   round: number;
   countdownEndsAt: number | null;
@@ -88,6 +89,7 @@ export class RoomManager {
       settings: { ...DEFAULT_SETTINGS },
       game: null,
       champion: null,
+      championSolution: null,
       phase: "lobby",
       round: 0,
       countdownEndsAt: null,
@@ -275,7 +277,9 @@ export class RoomManager {
   // ---- game flow ----
 
   private maybeAutoStart(room: Room) {
-    if (room.phase !== "lobby") return;
+    // Players ready up both in the lobby and after a round ends; either way,
+    // once everyone connected is ready we roll into the next round.
+    if (room.phase !== "lobby" && room.phase !== "roundEnd") return;
     const connected = [...room.players.values()].filter((p) => p.connected);
     if (connected.length >= 1 && connected.every((p) => p.ready)) {
       this.beginStartCountdown(room);
@@ -286,6 +290,7 @@ export class RoomManager {
     this.clearTimers(room);
     room.phase = "starting";
     room.champion = null;
+    room.championSolution = null;
     room.countdownEndsAt = null;
     room.startCountdownEndsAt = Date.now() + START_COUNTDOWN_MS;
     for (const p of room.players.values()) {
@@ -305,6 +310,7 @@ export class RoomManager {
     room.phase = "open";
     room.round += 1;
     room.champion = null;
+    room.championSolution = null;
     room.startCountdownEndsAt = null;
     room.countdownEndsAt = null;
     for (const p of room.players.values()) {
@@ -354,6 +360,7 @@ export class RoomManager {
     if (room.phase === "open") {
       // first solution of the round: become champion, start the challenge clock
       room.champion = { playerId: player.id, name: player.name, moves: res.moveCount };
+      room.championSolution = moves;
       room.phase = "challenge";
       room.countdownEndsAt = Date.now() + room.settings.countdownSeconds * 1000;
       room.challengeTimer = setTimeout(
@@ -365,6 +372,7 @@ export class RoomManager {
     } else if (room.champion && res.moveCount < room.champion.moves) {
       // beat the champion (countdown is NOT reset)
       room.champion = { playerId: player.id, name: player.name, moves: res.moveCount };
+      room.championSolution = moves;
       becameChampion = true;
       this.systemChat(room, `${player.name} found a better solution: ${res.moveCount} moves!`);
     }
@@ -518,6 +526,7 @@ export class RoomManager {
       champion: room.champion,
       puzzle: showPuzzle ? room.game!.puzzle() : null,
       round: room.round,
+      solution: room.phase === "roundEnd" ? room.championSolution : null,
       countdownEndsAt: room.countdownEndsAt,
       startCountdownEndsAt: room.startCountdownEndsAt,
       resumePhase: room.resumePhase,

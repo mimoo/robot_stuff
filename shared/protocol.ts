@@ -54,6 +54,9 @@ export type RoomState = {
   // black during 3-2-1 / lobby.
   puzzle: Puzzle | null;
   round: number;
+  // The winning move sequence, revealed to everyone at round end so they can
+  // replay it. Null while a round is live or in the lobby.
+  solution: Move[] | null;
   // Absolute epoch-ms timestamps for whatever timer is currently running.
   countdownEndsAt: number | null; // challenge countdown
   startCountdownEndsAt: number | null; // 3-2-1
